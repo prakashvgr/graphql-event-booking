@@ -3,12 +3,43 @@ const bcrypt = require('bcryptjs')
 const Event = require('../../models/event')
 const User = require('../..//models/user')
 
+const events = eventIDs => {
+    return Event.find({_id: {$in: eventIDs}})
+        .then(events => {
+            return events.map(event => {
+                return { 
+                    ...event._doc,
+                    creator: user.bind(this, event.creator)
+                }
+            })
+        })
+        .catch(err => {
+            throw err
+        })
+}
+
+const user = userID => {
+    return User.findById(userID)
+        .then(user => {
+            return { 
+                ...user._doc,
+                createdEvents: events.bind(this, ...user._doc.createdEvents)
+            }
+        })
+        .catch(err => {
+            throw err
+        })
+}
+
 module.exports = {
     events: () => {
         return Event.find()
             .then(events => {
                 return events.map(event => {
-                    return { ...event._doc}
+                    return { 
+                        ...event._doc,
+                        creator: user.bind(this, event._doc.creator)
+                    }
                 })
             })
             .catch(err => {
@@ -23,11 +54,15 @@ module.exports = {
             date: new Date().toISOString(),
             creator: "5ebd12a45e645416e1a8790b"
         })
-        let createdEvent = ''
+        let createdEvent
         return event
             .save()
             .then(result => {
-                createdEvent = {...result._doc}
+                createdEvent = {
+                    ...result._doc,
+                    date: new Date(result._doc.date).toISOString(),
+                    creator: user.bind(this, result._doc.creator)
+                }
                 return User.findById('5ebd12a45e645416e1a8790b')
             })
             .then(user => {
