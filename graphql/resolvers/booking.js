@@ -4,7 +4,10 @@ const Booking = require('../../models/booking')
 const { transfromEvent, transfromBooking } = require('./merge')
 
 module.exports = {
-    bookings: async () => {
+    bookings: async (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthroized access!')
+        }
         try {
             const bookings = await Booking.find()
             return bookings.map(booking => {
@@ -14,11 +17,14 @@ module.exports = {
             throw err
         }
     },
-    bookEvent: async args => {
+    bookEvent: async (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthroized access!')
+        }
         try {
             const fetchedEvent = await Event.findOne({_id: args.eventId})
             const booking = new Booking({
-                user: '5ebe3be3ac3b221ff93994cf',
+                user: req.userId,
                 event: fetchedEvent
             })
             const result = await booking.save()
@@ -27,7 +33,10 @@ module.exports = {
             throw err
         }
     },
-    cancelBooking: async args => {
+    cancelBooking: async (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthroized access!')
+        }
         try {
             const booking = await Booking.findById(args.bookingId).populate('event')
             const event = transfromEvent(booking.event)

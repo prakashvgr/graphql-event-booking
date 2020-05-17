@@ -14,19 +14,22 @@ module.exports = {
             return err
         }
     },
-    createEvent: async args => {
+    createEvent: async (args, req) => {
+        if(!req.isAuth) {
+            throw new Error('Unauthroized access!')
+        }
         const event = new Event({
             title: args.eventInput.title,
             description: args.eventInput.description,
             price: +args.eventInput.price,
             date: new Date().toISOString(),
-            creator: "5ebe3be3ac3b221ff93994cf"
+            creator: req.userId
         })
         let createdEvent
         try {
             const result = await event.save()
             createdEvent = transfromEvent(result)
-            const creator = await User.findById('5ebe3be3ac3b221ff93994cf')
+            const creator = await User.findById(req.userId)
             if (!creator) {
                 throw new Error("User doesn't exist!")
             }
