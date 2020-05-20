@@ -1,2 +1,4 @@
-node_modules/
+node_modules
 nodemon.json
+.vscode
+.DB_Store
